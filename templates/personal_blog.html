@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     /* ===== RESET & BASE ===== */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1292,90 +1292,84 @@
     document.querySelectorAll('.skills-grid, .projects-grid, .certs-grid, .blog-grid, .achievements-list').forEach(el => staggerObserver.observe(el));
 
     // ===== CONTACT FORM — posts to Flask /submit-contact =====
-    async function handleSubmit(e) {
-      e.preventDefault();
-      const btn  = document.getElementById('submitBtn');
-      const form = e.target;
+// ===== EMAILJS =====
+emailjs.init("ErqAfa3mFRxoP7dMI"); // ← paste your Public Key
 
-      const payload = {
-        name:    form.querySelector('input[name="name"]').value.trim(),
-        email:   form.querySelector('input[name="email"]').value.trim(),
-        subject: form.querySelector('input[name="subject"]').value.trim(),
-        message: form.querySelector('textarea[name="message"]').value.trim(),
-      };
+async function handleSubmit(e) {
+  e.preventDefault();
+  const btn  = document.getElementById('submitBtn');
+  const form = e.target;
 
-      if (!payload.name || !payload.email || !payload.subject || !payload.message) {
-        _setBtn(btn, '⚠ Please fill all fields', '#e74c3c', false);
-        setTimeout(() => _resetBtn(btn), 3000);
-        return;
-      }
+  const name    = form.querySelector('input[name="name"]').value.trim();
+  const email   = form.querySelector('input[name="email"]').value.trim();
+  const subject = form.querySelector('input[name="subject"]').value.trim();
+  const message = form.querySelector('textarea[name="message"]').value.trim();
 
-      _setBtn(btn, 'Sending…', 'var(--teal)', true);
+  if (!name || !email || !subject || !message) {
+    _setBtn(btn, '⚠ Please fill all fields', '#e74c3c', false);
+    setTimeout(() => _resetBtn(btn), 3000);
+    return;
+  }
 
-      try {
-        const res  = await fetch('/submit-contact', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(payload),
-        });
-        const data = await res.json().catch(() => ({}));
+  _setBtn(btn, 'Sending…', 'var(--teal)', true);
 
-        if (res.ok && data.success) {
-          _setBtn(btn, 'Message Sent! ✓', 'var(--accent)', true);
-          form.reset();
-          _showToast('Your message is on its way to Kiran 🚀', 'success');
-        } else {
-          const errMsg = data.error || 'Something went wrong. Please retry.';
-          _setBtn(btn, 'Failed — Retry', '#e74c3c', false);
-          _showToast(errMsg, 'error');
-        }
-      } catch (err) {
-        _setBtn(btn, 'Network Error — Retry', '#e74c3c', false);
-        _showToast('Could not reach the server. Check your connection.', 'error');
-      }
+  try {
+    await emailjs.send(
+      "service_fc19vrv",    // ← paste service_XXXXXXX
+      "https://dashboard.emailjs.com/admin/templates/o38zydk",   // ← paste template_XXXXXXX
+      { from_name: name, from_email: email, subject: subject, message: message }
+    );
+    _setBtn(btn, 'Message Sent! ✓', 'var(--accent)', true);
+    form.reset();
+    _showToast('Your message is on its way to Kiran 🚀', 'success');
+  } catch (err) {
+    console.error('EmailJS error:', err);
+    _setBtn(btn, 'Failed — Retry', '#e74c3c', false);
+    _showToast('Something went wrong. Please retry.', 'error');
+  }
 
-      setTimeout(() => _resetBtn(btn), 3000);
-    }
+  setTimeout(() => _resetBtn(btn), 3000);
+}
 
-    function _setBtn(btn, text, bg, disabled) {
-      btn.textContent = text;
-      btn.style.background = bg;
-      btn.disabled = disabled;
-    }
+function _setBtn(btn, text, bg, disabled) {
+  btn.textContent = text;
+  btn.style.background = bg;
+  btn.disabled = disabled;
+}
 
-    function _resetBtn(btn) {
-      btn.innerHTML = 'Send Message <i class="fas fa-paper-plane"></i>';
-      btn.style.background = 'var(--teal)';
-      btn.disabled = false;
-    }
+function _resetBtn(btn) {
+  btn.innerHTML = 'Send Message <i class="fas fa-paper-plane"></i>';
+  btn.style.background = 'var(--teal)';
+  btn.disabled = false;
+}
 
-    function _showToast(message, type) {
-      document.getElementById('contact-toast')?.remove();
-      const toast = document.createElement('div');
-      toast.id = 'contact-toast';
-      toast.textContent = message;
-      Object.assign(toast.style, {
-        position: 'fixed', bottom: '28px', right: '28px',
-        padding: '14px 22px', borderRadius: '10px',
-        fontFamily: 'var(--font)', fontSize: '0.9rem', fontWeight: '600',
-        color: '#000',
-        background: type === 'success' ? 'var(--accent)' : '#e74c3c',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.3)', zIndex: '9999',
-        transform: 'translateY(20px)', opacity: '0',
-        transition: 'transform 0.3s ease, opacity 0.3s ease',
-        maxWidth: '320px',
-      });
-      document.body.appendChild(toast);
-      requestAnimationFrame(() => {
-        toast.style.transform = 'translateY(0)';
-        toast.style.opacity = '1';
-      });
-      setTimeout(() => {
-        toast.style.transform = 'translateY(20px)';
-        toast.style.opacity = '0';
-        toast.addEventListener('transitionend', () => toast.remove());
-      }, 4500);
-    }
+function _showToast(message, type) {
+  document.getElementById('contact-toast')?.remove();
+  const toast = document.createElement('div');
+  toast.id = 'contact-toast';
+  toast.textContent = message;
+  Object.assign(toast.style, {
+    position: 'fixed', bottom: '28px', right: '28px',
+    padding: '14px 22px', borderRadius: '10px',
+    fontFamily: 'var(--font)', fontSize: '0.9rem', fontWeight: '600',
+    color: '#000',
+    background: type === 'success' ? 'var(--accent)' : '#e74c3c',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.3)', zIndex: '9999',
+    transform: 'translateY(20px)', opacity: '0',
+    transition: 'transform 0.3s ease, opacity 0.3s ease',
+    maxWidth: '320px',
+  });
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+  });
+  setTimeout(() => {
+    toast.style.transform = 'translateY(20px)';
+    toast.style.opacity = '0';
+    toast.addEventListener('transitionend', () => toast.remove());
+  }, 4500);
+}
 
     // ===== SMOOTH ACTIVE NAV LINKS =====
     const sections = document.querySelectorAll('section[id]');
