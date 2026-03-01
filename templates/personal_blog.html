@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
   <style>
     /* ===== RESET & BASE ===== */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -792,6 +793,7 @@
         <li><a href="#blog">Blog</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
+      <a href="mailto:kiranhl2003@gmail.com" class="nav-cta">Hire Me</a>
       <div class="hamburger" id="hamburger" aria-label="Menu">
         <span></span><span></span><span></span>
       </div>
@@ -1291,91 +1293,91 @@
 
     document.querySelectorAll('.skills-grid, .projects-grid, .certs-grid, .blog-grid, .achievements-list').forEach(el => staggerObserver.observe(el));
 
-    // ===== CONTACT FORM — posts to Flask /submit-contact =====
-// ===== EMAILJS =====
-emailjs.init("ErqAfa3mFRxoP7dMI"); // ← paste your Public Key
+    // ===== EMAILJS =====
+    emailjs.init("ErqAfa3mFRxoP7dMI");
 
-async function handleSubmit(e) {
-  e.preventDefault();
-  const btn  = document.getElementById('submitBtn');
-  const form = e.target;
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const btn  = document.getElementById('submitBtn');
+      const form = e.target;
 
-  const name    = form.querySelector('input[name="name"]').value.trim();
-  const email   = form.querySelector('input[name="email"]').value.trim();
-  const subject = form.querySelector('input[name="subject"]').value.trim();
-  const message = form.querySelector('textarea[name="message"]').value.trim();
+      const name    = form.querySelector('input[name="name"]').value.trim();
+      const email   = form.querySelector('input[name="email"]').value.trim();
+      const subject = form.querySelector('input[name="subject"]').value.trim();
+      const message = form.querySelector('textarea[name="message"]').value.trim();
 
-  if (!name || !email || !subject || !message) {
-    _setBtn(btn, '⚠ Please fill all fields', '#e74c3c', false);
-    setTimeout(() => _resetBtn(btn), 3000);
-    return;
-  }
+      if (!name || !email || !subject || !message) {
+        _setBtn(btn, '⚠ Please fill all fields', '#e74c3c', false);
+        setTimeout(() => _resetBtn(btn), 3000);
+        return;
+      }
 
-  _setBtn(btn, 'Sending…', 'var(--teal)', true);
+      _setBtn(btn, 'Sending…', 'var(--teal)', true);
 
-  try {
-    await emailjs.send(
-      "service_fc19vrv",    // ← paste service_XXXXXXX
-      "template_o38zydk",   // ← paste template_XXXXXXX
-      { from_name: name, from_email: email, subject: subject, message: message }
-    );
-    _setBtn(btn, 'Message Sent! ✓', 'var(--accent)', true);
-    form.reset();
-    _showToast('Your message is on its way to Kiran 🚀', 'success');
-  } catch (err) {
-    console.error('EmailJS error:', err);
-    _setBtn(btn, 'Failed — Retry', '#e74c3c', false);
-    _showToast('Something went wrong. Please retry.', 'error');
-  }
+      try {
+        await emailjs.send(
+          "service_fc19vrv",
+          "template_o38zydk",
+          { from_name: name, from_email: email, subject: subject, message: message }
+        );
+        _setBtn(btn, 'Message Sent! ✓', 'var(--accent)', true);
+        form.reset();
+        _showToast('Your message is on its way to Kiran 🚀', 'success');
+      } catch (err) {
+        console.error('EmailJS error:', err);
+        _setBtn(btn, 'Failed — Retry', '#e74c3c', false);
+        _showToast('Something went wrong. Please retry.', 'error');
+      }
 
-  setTimeout(() => _resetBtn(btn), 3000);
-}
+      setTimeout(() => _resetBtn(btn), 3000);
+    }
 
-function _setBtn(btn, text, bg, disabled) {
-  btn.textContent = text;
-  btn.style.background = bg;
-  btn.disabled = disabled;
-}
+    function _setBtn(btn, text, bg, disabled) {
+      btn.textContent = text;
+      btn.style.background = bg;
+      btn.disabled = disabled;
+    }
 
-function _resetBtn(btn) {
-  btn.innerHTML = 'Send Message <i class="fas fa-paper-plane"></i>';
-  btn.style.background = 'var(--teal)';
-  btn.disabled = false;
-}
+    function _resetBtn(btn) {
+      btn.innerHTML = 'Send Message <i class="fas fa-paper-plane"></i>';
+      btn.style.background = 'var(--teal)';
+      btn.disabled = false;
+    }
 
-function _showToast(message, type) {
-  document.getElementById('contact-toast')?.remove();
-  const toast = document.createElement('div');
-  toast.id = 'contact-toast';
-  toast.textContent = message;
-  Object.assign(toast.style, {
-    position: 'fixed', bottom: '28px', right: '28px',
-    padding: '14px 22px', borderRadius: '10px',
-    fontFamily: 'var(--font)', fontSize: '0.9rem', fontWeight: '600',
-    color: '#000',
-    background: type === 'success' ? 'var(--accent)' : '#e74c3c',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.3)', zIndex: '9999',
-    transform: 'translateY(20px)', opacity: '0',
-    transition: 'transform 0.3s ease, opacity 0.3s ease',
-    maxWidth: '320px',
-  });
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => {
-    toast.style.transform = 'translateY(0)';
-    toast.style.opacity = '1';
-  });
-  setTimeout(() => {
-    toast.style.transform = 'translateY(20px)';
-    toast.style.opacity = '0';
-    toast.addEventListener('transitionend', () => toast.remove());
-  }, 4500);
-}
+    function _showToast(message, type) {
+      document.getElementById('contact-toast')?.remove();
+      const toast = document.createElement('div');
+      toast.id = 'contact-toast';
+      toast.textContent = message;
+      Object.assign(toast.style, {
+        position: 'fixed', bottom: '28px', right: '28px',
+        padding: '14px 22px', borderRadius: '10px',
+        fontFamily: 'var(--font)', fontSize: '0.9rem', fontWeight: '600',
+        color: '#000',
+        background: type === 'success' ? 'var(--accent)' : '#e74c3c',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.3)', zIndex: '9999',
+        transform: 'translateY(20px)', opacity: '0',
+        transition: 'transform 0.3s ease, opacity 0.3s ease',
+        maxWidth: '320px',
+      });
+      document.body.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+      });
+      setTimeout(() => {
+        toast.style.transform = 'translateY(20px)';
+        toast.style.opacity = '0';
+        toast.addEventListener('transitionend', () => toast.remove());
+      }, 4500);
+    }
 
     // ===== SMOOTH ACTIVE NAV LINKS =====
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.nav-links a');
     window.addEventListener('scroll', () => {
-            let current = '';
+      
+      let current = '';
       sections.forEach(section => {
         if (window.scrollY >= section.offsetTop - 200) current = section.getAttribute('id');
       });
@@ -1384,9 +1386,6 @@ function _showToast(message, type) {
       });
     });
   </script>
-
-  <!-- Contact Form Handler (served by Flask static) -->
-  <script src="{{ url_for('static', filename='contact_form.js') }}"></script>
 
 </body>
 </html>
